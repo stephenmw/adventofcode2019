@@ -49,11 +49,43 @@ impl IntcodeComputer {
                     println!("{}", lookup_param(&ram, m1, pc + 1));
                     pc += 2;
                 }
+                Opcode::JumpIfTrue(m1, m2) => {
+                    let cond = lookup_param(&ram, m1, pc + 1) != 0;
+                    let target = lookup_param(&ram, m2, pc + 2);
+                    if cond {
+                        pc = target as usize;
+                    } else {
+                        pc += 3;
+                    }
+                }
+                Opcode::JumpIfFalse(m1, m2) => {
+                    let cond = lookup_param(&ram, m1, pc + 1) != 0;
+                    let target = lookup_param(&ram, m2, pc + 2);
+                    if !cond {
+                        pc = target as usize;
+                    } else {
+                        pc += 3;
+                    }
+                }
+                Opcode::LessThan(m1, m2) => {
+                    let a = lookup_param(&ram, m1, pc + 1);
+                    let b = lookup_param(&ram, m2, pc + 2);
+                    let t = ram[pc + 3] as usize;
+                    ram[t] = if a < b { 1 } else { 0 };
+                    pc += 4;
+                }
+                Opcode::Equals(m1, m2) => {
+                    let a = lookup_param(&ram, m1, pc + 1);
+                    let b = lookup_param(&ram, m2, pc + 2);
+                    let t = ram[pc + 3] as usize;
+                    ram[t] = if a == b { 1 } else { 0 };
+                    pc += 4;
+                }
                 Opcode::Halt => break,
             }
         }
 
-        return ram
+        ram
     }
 }
 
@@ -104,6 +136,10 @@ enum Opcode {
     Mul(ParameterMode, ParameterMode),
     Input,
     Output(ParameterMode),
+    JumpIfTrue(ParameterMode, ParameterMode),
+    JumpIfFalse(ParameterMode, ParameterMode),
+    LessThan(ParameterMode, ParameterMode),
+    Equals(ParameterMode, ParameterMode),
     Halt,
 }
 
@@ -120,6 +156,10 @@ fn parse_opcode(opcode: i32) -> Opcode {
         2 => Opcode::Mul(m1, m2),
         3 => Opcode::Input,
         4 => Opcode::Output(m1),
+        5 => Opcode::JumpIfTrue(m1, m2),
+        6 => Opcode::JumpIfFalse(m1, m2),
+        7 => Opcode::LessThan(m1, m2),
+        8 => Opcode::Equals(m1, m2),
         99 => Opcode::Halt,
         _ => panic!("bad Opcode"),
     }
