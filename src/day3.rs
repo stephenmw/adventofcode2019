@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::error::Error;
 use std::fmt;
@@ -8,26 +9,47 @@ use num::range_step;
 
 pub fn main() {
     let paths = read_paths("data/day3.txt").expect("failed to load paths");
-    let ans = distance(&paths[0], &paths[1]).unwrap();
-    println!("Part 1: {}", ans);
+    println!("Part 1: {}", distance1(&paths[0], &paths[1]).unwrap());
+    println!("Part 2: {}", distance2(&paths[0], &paths[1]).unwrap());
 }
 
-fn distance(path1: &[Move], path2: &[Move]) -> Option<i32> {
-    let path1_points = point_set(path1);
-    let path2_points = point_set(path2);
-    path1_points.intersection(&path2_points)
-        .filter(|&p| *p != Point{x: 0, y: 0})
-        .map(|p| p.x.abs() + p.y.abs())
+fn distance1(path1: &[Move], path2: &[Move]) -> Option<i32> {
+    junction(path1, path2).iter()
+        .filter(|(p, _)| *p != Point{x: 0, y: 0})
+        .map(|(p, _)| p.x.abs() + p.y.abs())
         .min()
 }
 
-fn point_set(path: &[Move]) -> HashSet<Point> {
-    let mut ret = HashSet::new();
+fn distance2(path1: &[Move], path2: &[Move]) -> Option<i32> {
+    junction(path1, path2).iter()
+        .filter(|(p, _)| *p != Point{x: 0, y: 0})
+        .map(|(_, v)| *v)
+        .min()
+}
+
+fn junction(path1: &[Move], path2: &[Move]) -> Vec<(Point, i32)> {
+    let path1_points = point_set(path1);
+    let path2_points = point_set(path2);
+    intersection(&path1_points, &path2_points)
+}
+
+fn intersection(m1: &HashMap<Point, i32>, m2: &HashMap<Point, i32>) -> Vec<(Point, i32)> {
+    let s1: HashSet<_> = m1.keys().collect();
+    let s2: HashSet<_> = m2.keys().collect();
+    s1.intersection(&s2)
+        .map(|&k| (*k, m1.get(k).unwrap() + m2.get(k).unwrap()) )
+        .collect()
+}
+
+fn point_set(path: &[Move]) -> HashMap<Point, i32> {
+    let mut ret = HashMap::new();
     let mut last = Point{x: 0, y: 0};
+    let mut n = 0;
     for m in path {
         for point in points(last, *m) {
             last = point;
-            ret.insert(point);
+            n += 1;
+            ret.entry(point).or_insert(n);
         }
     }
     ret
@@ -134,7 +156,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_distance() {
+    fn test_distance1() {
         let tests = vec![
             ("R8,U5,L5,D3","U7,R6,D4,L4", 6),
             ("R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83", 159),
@@ -144,7 +166,23 @@ mod tests {
         for (path1, path2, expected) in tests {
             let p1 = parse_path(path1).unwrap();
             let p2 = parse_path(path2).unwrap();
-            let result = distance(&p1, &p2).unwrap();
+            let result = distance1(&p1, &p2).unwrap();
+            assert_eq!(result, expected);
+        }
+    }
+
+    #[test]
+    fn test_distance2() {
+        let tests = vec![
+            ("R8,U5,L5,D3","U7,R6,D4,L4", 30),
+            ("R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83", 610),
+            ("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51", "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7", 410),
+        ];
+
+        for (path1, path2, expected) in tests {
+            let p1 = parse_path(path1).unwrap();
+            let p2 = parse_path(path2).unwrap();
+            let result = distance2(&p1, &p2).unwrap();
             assert_eq!(result, expected);
         }
     }
