@@ -7,9 +7,10 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 fn main() {
-    let day = 7;
+    let day = 8;
     match day {
         1 => day1::main(),
         2 => day2::main(),
@@ -18,6 +19,7 @@ fn main() {
         5 => day5::main(),
         6 => day6::main(),
         7 => day7::main(),
+        8 => day8::main(),
         _ => panic!("bad day"),
     };
 }
