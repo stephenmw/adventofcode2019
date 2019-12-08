@@ -1,6 +1,12 @@
 pub fn main() {
-    println!("Part 1: {}", num_password_options(359282, 820401, &validate1));
-    println!("Part 2: {}", num_password_options(359282, 820401, &validate2));
+    println!(
+        "Part 1: {}",
+        num_password_options(359282, 820401, &validate1)
+    );
+    println!(
+        "Part 2: {}",
+        num_password_options(359282, 820401, &validate2)
+    );
 }
 
 fn num_password_options(min: u32, max: u32, filter: &dyn Fn(u32) -> bool) -> u32 {

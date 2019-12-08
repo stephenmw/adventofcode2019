@@ -15,9 +15,9 @@ fn part2(program: &[i32]) -> i32 {
             for c in 5..10 {
                 for d in 5..10 {
                     for e in 5..10 {
-                        let candidate = &vec![a,b,c,d,e];
+                        let candidate = &vec![a, b, c, d, e];
                         if only_one_used(candidate.clone()) {
-                            ret = max(ret, feedbad_signal(program, &vec![a,b,c,d,e]));
+                            ret = max(ret, feedbad_signal(program, &vec![a, b, c, d, e]));
                         }
                     }
                 }
@@ -46,9 +46,9 @@ fn max_5amp_signal(program: &[i32]) -> i32 {
             for c in 0..5 {
                 for d in 0..5 {
                     for e in 0..5 {
-                        let candidate = &vec![a,b,c,d,e];
+                        let candidate = &vec![a, b, c, d, e];
                         if only_one_used(candidate.clone()) {
-                            let mut amps = AmpSeries::new(program, &vec![a,b,c,d,e]);
+                            let mut amps = AmpSeries::new(program, &vec![a, b, c, d, e]);
                             ret = max(ret, amps.run(0));
                         }
                     }
@@ -67,7 +67,8 @@ struct AmpSeries {
 impl AmpSeries {
     fn new(program: &[i32], phases: &[i32]) -> AmpSeries {
         AmpSeries {
-            amps: phases.iter()
+            amps: phases
+                .iter()
                 .map(|&x| Amp::new(program.to_vec(), x))
                 .collect(),
         }
@@ -93,7 +94,7 @@ struct Amp {
 impl Amp {
     fn new(program: Vec<i32>, phase: i32) -> Amp {
         let mut amp = Amp {
-            cpu: intcode::Computer::new(program)
+            cpu: intcode::Computer::new(program),
         };
         amp.cpu.execute();
         amp.cpu.input(phase);
@@ -136,15 +137,55 @@ mod tests {
 
     #[test]
     fn test_amp_series() {
-        exec_test(vec![3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0], &vec![4,3,2,1,0], 43210);
-        exec_test(vec![3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0], &vec![0,1,2,3,4], 54321);
-        exec_test(vec![3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0], &vec![1,0,4,3,2], 65210);
+        exec_test(
+            vec![
+                3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0,
+            ],
+            &vec![4, 3, 2, 1, 0],
+            43210,
+        );
+        exec_test(
+            vec![
+                3, 23, 3, 24, 1002, 24, 10, 24, 1002, 23, -1, 23, 101, 5, 23, 23, 1, 24, 23, 23, 4,
+                23, 99, 0, 0,
+            ],
+            &vec![0, 1, 2, 3, 4],
+            54321,
+        );
+        exec_test(
+            vec![
+                3, 31, 3, 32, 1002, 32, 10, 32, 1001, 31, -2, 31, 1007, 31, 0, 33, 1002, 33, 7, 33,
+                1, 33, 31, 31, 1, 32, 31, 31, 4, 31, 99, 0, 0, 0,
+            ],
+            &vec![1, 0, 4, 3, 2],
+            65210,
+        );
     }
 
     #[test]
     fn test_max_5amp_signal() {
-        exec_test2(vec![3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0], &vec![4,3,2,1,0], 43210);
-        exec_test2(vec![3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0], &vec![0,1,2,3,4], 54321);
-        exec_test2(vec![3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0], &vec![1,0,4,3,2], 65210);     
+        exec_test2(
+            vec![
+                3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0,
+            ],
+            &vec![4, 3, 2, 1, 0],
+            43210,
+        );
+        exec_test2(
+            vec![
+                3, 23, 3, 24, 1002, 24, 10, 24, 1002, 23, -1, 23, 101, 5, 23, 23, 1, 24, 23, 23, 4,
+                23, 99, 0, 0,
+            ],
+            &vec![0, 1, 2, 3, 4],
+            54321,
+        );
+        exec_test2(
+            vec![
+                3, 31, 3, 32, 1002, 32, 10, 32, 1001, 31, -2, 31, 1007, 31, 0, 33, 1002, 33, 7, 33,
+                1, 33, 31, 31, 1, 32, 31, 31, 4, 31, 99, 0, 0, 0,
+            ],
+            &vec![1, 0, 4, 3, 2],
+            65210,
+        );
     }
 }
