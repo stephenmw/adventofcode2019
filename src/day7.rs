@@ -31,8 +31,11 @@ fn part2(program: &[i32]) -> i32 {
 fn feedbad_signal(program: &[i32], phases: &[i32]) -> i32 {
     let mut output = 0;
     let mut amps = AmpSeries::new(program, phases);
-    while !amps.done() {
-        output = amps.run(output)
+    loop {
+        output = match amps.run(output) {
+            Some(x) => x,
+            None => break,
+        }
     }
 
     output
@@ -49,7 +52,7 @@ fn max_5amp_signal(program: &[i32]) -> i32 {
                         let candidate = &vec![a, b, c, d, e];
                         if only_one_used(candidate.clone()) {
                             let mut amps = AmpSeries::new(program, &vec![a, b, c, d, e]);
-                            ret = max(ret, amps.run(0));
+                            ret = max(ret, amps.run(0).unwrap());
                         }
                     }
                 }
@@ -74,16 +77,15 @@ impl AmpSeries {
         }
     }
 
-    fn run(&mut self, input: i32) -> i32 {
+    fn run(&mut self, input: i32) -> Option<i32> {
         let mut output = input;
         for amp in self.amps.iter_mut() {
-            output = amp.run(output);
+            output = match amp.run(output) {
+                Some(x) => x,
+                None => return None,
+            };
         }
-        output
-    }
-
-    fn done(&self) -> bool {
-        self.amps.last().map(|x| x.cpu.is_halted()).unwrap_or(true)
+        Some(output)
     }
 }
 
@@ -98,22 +100,23 @@ impl Amp {
         };
         amp.cpu.execute();
         amp.cpu.input(phase);
-        amp.cpu.execute();
 
         amp
     }
 
-    fn run(&mut self, input: i32) -> i32 {
-        self.cpu.execute();
+    fn run(&mut self, input: i32) -> Option<i32> {
+        if self.cpu.execute() == intcode::State::Halted {
+            return None;
+        }
         self.cpu.input(input);
+
         let ret = match self.cpu.execute() {
             intcode::State::Output(x) => x,
-            _ => panic!("expected output"),
+            intcode::State::Halted => return None,
+            _ => panic!("expected output or halt"),
         };
 
-        self.cpu.execute();
-
-        ret
+        Some(ret)
     }
 }
 

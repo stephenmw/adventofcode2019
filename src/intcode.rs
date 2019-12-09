@@ -34,10 +34,6 @@ impl Computer {
         }
     }
 
-    pub fn is_halted(&self) -> bool {
-        self.state == State::Halted
-    }
-
     // Provides input. If state is not State::InputRequested, this function
     // panics.
     pub fn input(&mut self, i: i32) {
