@@ -219,9 +219,9 @@ mod tests {
 
     fn exec_test(input: Vec<i64>, expected: Vec<i64>) {
         let mem = input.clone();
-        let mut cpu = Computer::new(mem);
+        let mut cpu = Computer::new(&mem);
         cpu.execute();
-        assert_eq!(cpu.ram, expected);
+        assert_eq!(cpu.ram[..expected.len()], expected[..]);
     }
 
     #[test]

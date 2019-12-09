@@ -128,7 +128,7 @@ mod tests {
     use super::*;
 
     fn exec_test(rom: Vec<i64>, phases: &[i64], expected: i64) {
-        assert_eq!(AmpSeries::new(&rom, phases).run(0), expected);
+        assert_eq!(AmpSeries::new(&rom, phases).run(0), Some(expected));
     }
 
     fn exec_test2(rom: Vec<i64>, _: &[i64], expected: i64) {
