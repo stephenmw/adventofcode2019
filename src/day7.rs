@@ -7,7 +7,7 @@ pub fn main() {
     println!("Part 2: {}", part2(&program));
 }
 
-fn part2(program: &[i32]) -> i32 {
+fn part2(program: &[i64]) -> i64 {
     let mut ret = 0;
 
     for a in 5..10 {
@@ -28,7 +28,7 @@ fn part2(program: &[i32]) -> i32 {
     ret
 }
 
-fn feedbad_signal(program: &[i32], phases: &[i32]) -> i32 {
+fn feedbad_signal(program: &[i64], phases: &[i64]) -> i64 {
     let mut output = 0;
     let mut amps = AmpSeries::new(program, phases);
     loop {
@@ -41,7 +41,7 @@ fn feedbad_signal(program: &[i32], phases: &[i32]) -> i32 {
     output
 }
 
-fn max_5amp_signal(program: &[i32]) -> i32 {
+fn max_5amp_signal(program: &[i64]) -> i64 {
     let mut ret = 0;
 
     for a in 0..5 {
@@ -68,16 +68,13 @@ struct AmpSeries {
 }
 
 impl AmpSeries {
-    fn new(program: &[i32], phases: &[i32]) -> AmpSeries {
+    fn new(program: &[i64], phases: &[i64]) -> AmpSeries {
         AmpSeries {
-            amps: phases
-                .iter()
-                .map(|&x| Amp::new(program.to_vec(), x))
-                .collect(),
+            amps: phases.iter().map(|&x| Amp::new(program, x)).collect(),
         }
     }
 
-    fn run(&mut self, input: i32) -> Option<i32> {
+    fn run(&mut self, input: i64) -> Option<i64> {
         let mut output = input;
         for amp in self.amps.iter_mut() {
             output = match amp.run(output) {
@@ -94,7 +91,7 @@ struct Amp {
 }
 
 impl Amp {
-    fn new(program: Vec<i32>, phase: i32) -> Amp {
+    fn new(program: &[i64], phase: i64) -> Amp {
         let mut amp = Amp {
             cpu: intcode::Computer::new(program),
         };
@@ -104,7 +101,7 @@ impl Amp {
         amp
     }
 
-    fn run(&mut self, input: i32) -> Option<i32> {
+    fn run(&mut self, input: i64) -> Option<i64> {
         if self.cpu.execute() == intcode::State::Halted {
             return None;
         }
@@ -120,7 +117,7 @@ impl Amp {
     }
 }
 
-fn only_one_used(xs: Vec<i32>) -> bool {
+fn only_one_used(xs: Vec<i64>) -> bool {
     let mut xs = xs;
     xs.sort();
     xs[..].windows(2).all(|x| x[0] != x[1])
@@ -130,11 +127,11 @@ fn only_one_used(xs: Vec<i32>) -> bool {
 mod tests {
     use super::*;
 
-    fn exec_test(rom: Vec<i32>, phases: &[i32], expected: i32) {
+    fn exec_test(rom: Vec<i64>, phases: &[i64], expected: i64) {
         assert_eq!(AmpSeries::new(&rom, phases).run(0), expected);
     }
 
-    fn exec_test2(rom: Vec<i32>, _: &[i32], expected: i32) {
+    fn exec_test2(rom: Vec<i64>, _: &[i64], expected: i64) {
         assert_eq!(max_5amp_signal(&rom), expected);
     }
 

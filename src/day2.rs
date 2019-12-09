@@ -6,13 +6,13 @@ pub fn main() {
     println!("Part 2: {}", part2(&program).unwrap());
 }
 
-fn part1(program: &[i32]) -> i32 {
+fn part1(program: &[i64]) -> i64 {
     execute_with_params(&program, 12, 2)
 }
 
-fn part2(input: &[i32]) -> Option<i32> {
-    for a in 0..input.len() as i32 {
-        for b in 0..input.len() as i32 {
+fn part2(input: &[i64]) -> Option<i64> {
+    for a in 0..input.len() as i64 {
+        for b in 0..input.len() as i64 {
             let ret = execute_with_params(&input, a, b);
             if ret == 19690720 {
                 return Some(a * 100 + b);
@@ -23,11 +23,10 @@ fn part2(input: &[i32]) -> Option<i32> {
     None
 }
 
-fn execute_with_params(input: &[i32], a: i32, b: i32) -> i32 {
-    let mut mem = input.to_vec();
-    mem[1] = a;
-    mem[2] = b;
-    let mut cpu = intcode::Computer::new(mem);
+fn execute_with_params(input: &[i64], a: i64, b: i64) -> i64 {
+    let mut cpu = intcode::Computer::new(input);
+    cpu.ram[1] = a;
+    cpu.ram[2] = b;
     cpu.execute();
     cpu.ram[0]
 }
