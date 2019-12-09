@@ -2,7 +2,6 @@ use num::range_step;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::error::Error;
-use std::fmt;
 use std::fs;
 use std::path::Path;
 use std::str::FromStr;
@@ -13,7 +12,7 @@ pub fn main() {
     println!("Part 2: {}", distance2(&paths[0], &paths[1]).unwrap());
 }
 
-fn distance1(path1: &[Move], path2: &[Move]) -> Option<i32> {
+fn distance1(path1: &[Segment], path2: &[Segment]) -> Option<i32> {
     junction(path1, path2)
         .iter()
         .filter(|(p, _)| *p != Point { x: 0, y: 0 })
@@ -21,7 +20,7 @@ fn distance1(path1: &[Move], path2: &[Move]) -> Option<i32> {
         .min()
 }
 
-fn distance2(path1: &[Move], path2: &[Move]) -> Option<i32> {
+fn distance2(path1: &[Segment], path2: &[Segment]) -> Option<i32> {
     junction(path1, path2)
         .iter()
         .filter(|(p, _)| *p != Point { x: 0, y: 0 })
@@ -29,9 +28,9 @@ fn distance2(path1: &[Move], path2: &[Move]) -> Option<i32> {
         .min()
 }
 
-fn junction(path1: &[Move], path2: &[Move]) -> Vec<(Point, i32)> {
-    let path1_points = point_set(path1);
-    let path2_points = point_set(path2);
+fn junction(path1: &[Segment], path2: &[Segment]) -> Vec<(Point, i32)> {
+    let path1_points = path_points(path1);
+    let path2_points = path_points(path2);
     intersection(&path1_points, &path2_points)
 }
 
@@ -43,12 +42,12 @@ fn intersection(m1: &HashMap<Point, i32>, m2: &HashMap<Point, i32>) -> Vec<(Poin
         .collect()
 }
 
-fn point_set(path: &[Move]) -> HashMap<Point, i32> {
+fn path_points(path: &[Segment]) -> HashMap<Point, i32> {
     let mut ret = HashMap::new();
     let mut last = Point { x: 0, y: 0 };
     let mut n = 0;
-    for m in path {
-        for point in points(last, *m) {
+    for seg in path {
+        for point in segment_points(last, *seg) {
             last = point;
             n += 1;
             ret.entry(point).or_insert(n);
@@ -57,8 +56,8 @@ fn point_set(path: &[Move]) -> HashMap<Point, i32> {
     ret
 }
 
-fn read_paths<P: AsRef<Path>>(filename: P) -> Result<Vec<Vec<Move>>, Box<dyn Error>> {
-    let mut ret: Vec<Vec<Move>> = Vec::new();
+fn read_paths<P: AsRef<Path>>(filename: P) -> Result<Vec<Vec<Segment>>, Box<dyn Error>> {
+    let mut ret: Vec<Vec<Segment>> = Vec::new();
     let raw = fs::read_to_string(filename)?;
     for line in raw.lines() {
         let path = parse_path(line)?;
@@ -68,18 +67,18 @@ fn read_paths<P: AsRef<Path>>(filename: P) -> Result<Vec<Vec<Move>>, Box<dyn Err
     Ok(ret)
 }
 
-fn parse_path(s: &str) -> Result<Vec<Move>, Box<dyn Error>> {
+fn parse_path(s: &str) -> Result<Vec<Segment>, Box<dyn Error>> {
     s.split_terminator(',').try_fold(Vec::new(), |mut acc, x| {
         acc.push(x.parse()?);
         Ok(acc)
     })
 }
 
-fn points(start: Point, next_move: Move) -> Box<dyn Iterator<Item = Point>> {
-    let l = next_move.length;
+fn segment_points(start: Point, seg: Segment) -> Box<dyn Iterator<Item = Point>> {
+    let l = seg.length;
     let sx = start.x;
     let sy = start.y;
-    match next_move.direction {
+    match seg.direction {
         Direction::Up => Box::new(((sy + 1)..(sy + l + 1)).map(move |y| start.with_y(y))),
         Direction::Down => {
             Box::new(range_step(sy - 1, sy - l - 1, -1).map(move |y| start.with_y(y)))
@@ -95,12 +94,6 @@ fn points(start: Point, next_move: Move) -> Box<dyn Iterator<Item = Point>> {
 struct Point {
     x: i32,
     y: i32,
-}
-
-impl fmt::Display for Point {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}, {})", self.x, self.y)
-    }
 }
 
 impl Point {
@@ -134,16 +127,16 @@ impl Direction {
 }
 
 #[derive(Copy, Clone, Debug)]
-struct Move {
+struct Segment {
     direction: Direction,
     length: i32,
 }
 
-impl FromStr for Move {
+impl FromStr for Segment {
     type Err = Box<dyn Error>;
 
-    fn from_str(src: &str) -> Result<Move, Box<dyn Error>> {
-        Ok(Move {
+    fn from_str(src: &str) -> Result<Segment, Box<dyn Error>> {
+        Ok(Segment {
             direction: Direction::from_char(src.chars().next().ok_or("failed to get direction")?)?,
             length: src[1..].parse()?,
         })
