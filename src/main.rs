@@ -9,9 +9,10 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
+mod day10;
 
 fn main() {
-    let day = 9;
+    let day = 10;
     match day {
         1 => day1::main(),
         2 => day2::main(),
@@ -22,6 +23,7 @@ fn main() {
         7 => day7::main(),
         8 => day8::main(),
         9 => day9::main(),
+        10 => day10::main(),
         _ => panic!("bad day"),
     };
 }
