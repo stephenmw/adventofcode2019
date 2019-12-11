@@ -6,7 +6,7 @@ const HEIGHT: usize = 6;
 const WIDTH: usize = 25;
 
 pub fn main() {
-    let image = read_image("data/day8.txt").expect("failed to read image");
+    let image = read_image("data/day08.txt").expect("failed to read image");
     println!("Part 1: {}", part1(&image));
     println!("{}", part2(&image));
 }

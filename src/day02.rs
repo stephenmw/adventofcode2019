@@ -1,7 +1,7 @@
 use crate::intcode;
 
 pub fn main() {
-    let program = intcode::read_program("data/day2.txt").expect("failed to read data");
+    let program = intcode::read_program("data/day02.txt").expect("failed to read data");
     println!("Part 1: {}", part1(&program));
     println!("Part 2: {}", part2(&program).unwrap());
 }

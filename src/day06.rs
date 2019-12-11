@@ -6,7 +6,7 @@ use std::io;
 use std::path::Path;
 
 pub fn main() {
-    let data = read_data("data/day6.txt").unwrap();
+    let data = read_data("data/day06.txt").unwrap();
     println!("Part 1: {}", count_orbits(&data));
     println!("Part 2: {}", quickest_path_length(&data));
 }

@@ -7,7 +7,7 @@ use std::path::Path;
 use std::str::FromStr;
 
 pub fn main() {
-    let paths = read_paths("data/day3.txt").expect("failed to load paths");
+    let paths = read_paths("data/day03.txt").expect("failed to load paths");
     println!("Part 1: {}", distance1(&paths[0], &paths[1]).unwrap());
     println!("Part 2: {}", distance2(&paths[0], &paths[1]).unwrap());
 }

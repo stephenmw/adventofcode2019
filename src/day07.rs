@@ -2,7 +2,7 @@ use crate::intcode;
 use std::cmp::max;
 
 pub fn main() {
-    let program = intcode::read_program("data/day7.txt").expect("failed to read program");
+    let program = intcode::read_program("data/day07.txt").expect("failed to read program");
     println!("Part 1: {}", max_5amp_signal(&program));
     println!("Part 2: {}", part2(&program));
 }

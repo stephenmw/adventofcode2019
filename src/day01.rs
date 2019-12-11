@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 
 pub fn main() {
-    let data = read_integers("data/day1.txt").expect("failed to read data");
+    let data = read_integers("data/day01.txt").expect("failed to read data");
     let ans1: i32 = data.iter().map(|&x| fuel_1(x)).sum();
     let ans2: i32 = data.iter().map(|&x| fuel_2(x)).sum();
 
