@@ -14,6 +14,44 @@ pub fn main() {
     render_map(&map);
 
     println!("Part 1: {}", path_length(&map, droid.location).unwrap());
+    println!("Part 2: {}", oxygen_fill_steps(&map));
+}
+
+fn oxygen_fill_steps(m: &HashMap<Point, Status>) -> usize {
+    let start = m.iter()
+        .filter(|(_k, v)| **v == Status::Oxygen)
+        .map(|(k, _v)| k)
+        .cloned()
+        .next()
+        .unwrap();
+
+    let mut frontier = VecDeque::new();
+    let mut seen = HashSet::new();
+    frontier.push_back((start, 0));
+    seen.insert(start);
+
+    let mut max_count = 0;
+
+    while let Some((loc, count)) = frontier.pop_front() {
+        let status = m.get(&loc).cloned().unwrap_or(Status::Wall);
+        match status {
+            Status::Empty | Status::Oxygen => {
+                max_count = max(max_count, count);
+                let children = Direction::iterator()
+                    .map(|dir| dir.step(&loc));
+
+                for child in children {
+                    if !seen.contains(&child) {
+                        frontier.push_back((child, count + 1));
+                        seen.insert(child);
+                    }
+                }
+            },
+            Status::Wall => (), // no-op
+        }
+    }
+
+    max_count
 }
 
 fn render_map(m: &HashMap<Point, Status>) {
@@ -36,7 +74,7 @@ fn render_map(m: &HashMap<Point, Status>) {
 
     for (point, status) in m.iter() {
         data[point_to_index(point)] = match status {
-            Status::Wall => 'X' as u8,
+            Status::Wall => '|' as u8,
             Status::Empty => '.' as u8,
             Status::Oxygen => 'O' as u8,
         };
@@ -85,16 +123,10 @@ fn explore(droid: &mut Droid) -> HashMap<Point, Status> {
 
     'outer: loop {
         for dir in Direction::iterator() {
-            if *dir == Direction::West && droid.location == (Point{x: 0, y: 0}) {
-                println!("there");
-            }
             if !m.contains_key(&dir.step(&droid.location)) {
                 let (status, point) = droid.step(*dir);
-                if point == (Point{x: -1, y: 0}) {
-                    println!("here");
-                }
                 m.insert(point, status);
-                if status == Status::Empty {
+                if status == Status::Empty || status == Status::Oxygen {
                     backtrack_stack.push(dir.opposite());
                 }
                 continue 'outer;
@@ -135,11 +167,7 @@ impl Droid {
         let point = dir.step(&self.location);
 
         match status {
-            Status::Empty => self.location = point,
-            Status::Oxygen => {
-                self.location = point;
-                self.step(dir.opposite());
-            }, // undo move
+            Status::Empty | Status::Oxygen => self.location = point,
             Status:: Wall => (), // no-op
         };
         if status == Status::Empty {
