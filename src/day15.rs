@@ -1,15 +1,13 @@
 use crate::intcode::{self, State};
 
-use std::convert::{TryFrom, TryInto};
-use std::collections::{HashMap, HashSet, VecDeque};
 use std::cmp::max;
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::convert::{TryFrom, TryInto};
 
 pub fn main() {
     let program = intcode::read_program("data/day15.txt").expect("failed to read program");
     let mut droid = Droid::new(&program);
     let map = explore(&mut droid);
-            println!("final loc: {:?}", droid.location);
-
 
     render_map(&map);
 
@@ -18,7 +16,8 @@ pub fn main() {
 }
 
 fn oxygen_fill_steps(m: &HashMap<Point, Status>) -> usize {
-    let start = m.iter()
+    let start = m
+        .iter()
         .filter(|(_k, v)| **v == Status::Oxygen)
         .map(|(k, _v)| k)
         .cloned()
@@ -37,8 +36,7 @@ fn oxygen_fill_steps(m: &HashMap<Point, Status>) -> usize {
         match status {
             Status::Empty | Status::Oxygen => {
                 max_count = max(max_count, count);
-                let children = Direction::iterator()
-                    .map(|dir| dir.step(&loc));
+                let children = Direction::iterator().map(|dir| dir.step(&loc));
 
                 for child in children {
                     if !seen.contains(&child) {
@@ -46,7 +44,7 @@ fn oxygen_fill_steps(m: &HashMap<Point, Status>) -> usize {
                         seen.insert(child);
                     }
                 }
-            },
+            }
             Status::Wall => (), // no-op
         }
     }
@@ -80,7 +78,7 @@ fn render_map(m: &HashMap<Point, Status>) {
         };
     }
 
-    data[point_to_index(&Point{x: 0, y: 0})] = 'S' as u8;
+    data[point_to_index(&Point { x: 0, y: 0 })] = 'S' as u8;
 
     data.chunks(len_x)
         .for_each(|line| println!("{}", String::from_utf8(line.to_vec()).unwrap()));
@@ -96,8 +94,7 @@ fn path_length(m: &HashMap<Point, Status>, start: Point) -> Option<usize> {
         let status = m.get(&loc).cloned().unwrap_or(Status::Wall);
         match status {
             Status::Empty => {
-                let children = Direction::iterator()
-                    .map(|dir| dir.step(&loc));
+                let children = Direction::iterator().map(|dir| dir.step(&loc));
 
                 for child in children {
                     if !seen.contains(&child) {
@@ -105,7 +102,7 @@ fn path_length(m: &HashMap<Point, Status>, start: Point) -> Option<usize> {
                         seen.insert(child);
                     }
                 }
-            },
+            }
             Status::Wall => (), // no-op
             Status::Oxygen => return Some(count),
         }
@@ -151,7 +148,7 @@ impl Droid {
     fn new(program: &[i64]) -> Droid {
         Droid {
             cpu: intcode::Computer::new(program),
-            location: Point{x: 0, y: 0},
+            location: Point { x: 0, y: 0 },
         }
     }
 
@@ -168,7 +165,7 @@ impl Droid {
 
         match status {
             Status::Empty | Status::Oxygen => self.location = point,
-            Status:: Wall => (), // no-op
+            Status::Wall => (), // no-op
         };
         if status == Status::Empty {
             self.location = point;
@@ -211,8 +208,8 @@ impl Direction {
         }
     }
 
-    pub fn iterator() -> impl Iterator<Item=&'static Direction> {
-        static DIRECTIONS: [Direction;  4] = [
+    pub fn iterator() -> impl Iterator<Item = &'static Direction> {
+        static DIRECTIONS: [Direction; 4] = [
             Direction::North,
             Direction::South,
             Direction::West,
@@ -220,7 +217,6 @@ impl Direction {
         ];
         DIRECTIONS.into_iter()
     }
-
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
